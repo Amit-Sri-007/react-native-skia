@@ -43,7 +43,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         switch (action) {
             case MotionEvent.ACTION_POINTER_DOWN:
             case MotionEvent.ACTION_POINTER_UP: {
-                points = new double[5];
+                points = new double[6];
                 int pointerIndex = ev.getActionIndex();
                 ev.getPointerCoords(pointerIndex, r);
                 points[0] = r.x;
@@ -51,6 +51,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
                 points[2] = ev.getPressure(pointerIndex);
                 points[3] = motionActionToType(action);
                 points[4] = ev.getPointerId(pointerIndex);
+                points[5] = motionActionToTool(ev.getToolType(pointerIndex));
 
                 updateTouchPoints(points);
 
@@ -60,7 +61,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
                 // For the rest we can just handle it like expected
                 int count = ev.getPointerCount();
                 int pointerIndex = 0;
-                points = new double[5 * count];
+                points = new double[6 * count];
                 for (int i = 0; i < count; i++) {
                     ev.getPointerCoords(i, r);
                     points[pointerIndex++] = r.x;
@@ -68,6 +69,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
                     points[pointerIndex++] = ev.getPressure(i);
                     points[pointerIndex++] = motionActionToType(action);
                     points[pointerIndex++] = ev.getPointerId(i);
+                    points[pointerIndex++] = motionActionToTool(ev.getToolType(i));
                 }
 
                 updateTouchPoints(points);
@@ -77,6 +79,29 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         }
 
         return true;
+    }
+
+    private static int motionActionToTool(int tool) {
+        int toolType = 4;
+        switch (tool) {
+            case MotionEvent.TOOL_TYPE_FINGER:
+                toolType = 0;
+                break;
+            case MotionEvent.TOOL_TYPE_STYLUS:
+                toolType = 1;
+                break;
+            case MotionEvent.TOOL_TYPE_ERASER:
+                toolType = 2;
+                break;
+            case MotionEvent.TOOL_TYPE_MOUSE:
+                toolType = 3;
+                break;
+            case MotionEvent.TOOL_TYPE_UNKNOWN:
+            default:
+                toolType = 4;
+                break;
+        }
+        return toolType;
     }
 
     private static int motionActionToType(int action) {
